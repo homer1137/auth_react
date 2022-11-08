@@ -1,6 +1,8 @@
 import React, { useState, SyntheticEvent } from "react";
 import { useNavigate } from "react-router";
-import axios from "axios";
+import { useFetching } from "../../hooks/useFetching";
+import PostServece from "../../API/PostServece";
+
 
 import "./Login.css";
 
@@ -9,50 +11,68 @@ type Props = {
   setPending: (state:boolean)=>void
 };
 
-export function Login({setName, setPending}:Props) {
+export function Login({setName}:Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  
 
   const navigate = useNavigate();
 
-  const submit = async (e: SyntheticEvent) => {
-    setPending(true);
-    e.preventDefault();
-    
-    try {
+  const [login, pendingLogin, errorLogin] = useFetching(async()=>{
+    const resp:any = await PostServece.login({
+      email,
+      password
+      })
+      console.log('resp', resp.request.response)
+  
+  })
 
-        const resp=await fetch("http://127.0.0.1:8000/api/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          redirect: "follow",
-          body: JSON.stringify({
-            email,
-            password,
-          }),
-          credentials: "include",
-        });
-        const resp2=await resp.json();
-        setName(resp2.name);
-        (async () => {
-          const resp = await fetch("http://127.0.0.1:8000/api/user", {
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-          });
-          const resp2 = await resp.json();
-          setName(resp2.name)
-        })().then(()=>{
-          setPending(false)
-        });
-        navigate("/");
+  const [getUser, pendingGetUser, errorGetUser] = useFetching(async()=>{
+    const resp:any = await PostServece.user()
+    console.log('resp2', resp.request.response)  
+    setName('egor')
+    navigate("/");
+  })
+
+
+  const submit = async (e: SyntheticEvent) => {
+    
+    e.preventDefault();
+ 
+    await login();
+    await getUser();
+
+        // const resp=await fetch("http://127.0.0.1:8000/api/login", {
+        //   method: "POST",
+        //   headers: { "Content-Type": "application/json" },
+        //   redirect: "follow",
+        //   body: JSON.stringify({
+        //     email,
+        //     password,
+        //   }),
+        //   credentials: "include",
+        // });
+        // const resp2=await resp.json();
+        // setName(resp2.name);
+        // (async () => {
+        //   const resp = await fetch("http://127.0.0.1:8000/api/user", {
+        //     headers: { "Content-Type": "application/json" },
+        //     credentials: "include",
+        //   });
+        //   const resp2 = await resp.json();
+        //   setName(resp2.name)
+        // })()
+
+
         
-    } catch (error) {
-      console.warn("this is an a error", error);
-    }
+        
+   
   };
 
   return (
     <>
+    {errorGetUser&&<h2>произошла ошибка{errorGetUser}</h2>}
+    {errorLogin&&<h2>произошла ошибка{errorLogin}</h2>}
+      {(pendingGetUser||pendingLogin)&&<h2>Loading</h2>}
       <form onSubmit={submit}>
         <div className="container">
           <label htmlFor="email">

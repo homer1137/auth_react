@@ -3,8 +3,10 @@ import { useNavigate } from "react-router";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {Link} from 'react-router-dom'
+import { useFetching } from "../../hooks/useFetching";
 
 import "./Register.css";
+import PostServece from "../../API/PostServece";
 
 export function Register() {
   const [name, setName] = useState("");
@@ -21,6 +23,7 @@ export function Register() {
   const [emailError, setEmailError] = useState("Email cannot be empty");
   const [passwordError, setPasswordError] = useState("Password cannot be empty");
   const [password2Error, setPassword2Error] = useState("Confirmation password cannot be empty");
+  const [repsonse, setResponse]=useState({})
 
   const navigate = useNavigate();
 
@@ -94,42 +97,31 @@ export function Register() {
       bodyClassName: "grow-font-size",
     });
 
-  const submit = async (e: SyntheticEvent) => {
-    e.preventDefault();
-    try {
-      const resp = await fetch("http://127.0.0.1:8000/api/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          email,
-          password,
-        }),
-      });
-      if (!resp.ok) {
-        const resp2 = JSON.parse(await resp.json());
-        console.log(resp2);
-        let err = new Error(
-          "HTTP status code " +
-            resp.status +
-            ". Errors: " +
-            `${resp2.email?resp2.email :''}`+
-            `${resp2.name?resp2.name :''}`+
-            `${resp2.password?resp2.password:''}`
-        );
+    const [registrate, pending, regError]=useFetching(async()=>{
+      const resp = await PostServece.register({
+        name,
+        email,
+        password,
+        'category_id': 2,
+        })
+        setResponse(resp)
+        navigate("/login");
+    })
 
-        throw err;
-      }
-      const resp2 = await resp.json();
-      console.log(resp2);
-      navigate("/login");
-    } catch (error: any) {
-      notify('->'+error);
-    }
-  };
+ 
+    const submit = async (e: SyntheticEvent) => {
+      e.preventDefault();
+      
+      registrate()
+
+
+      
+      };
 
   return (
     <>
+      {regError&&<h2>произошла ошибка{regError}</h2>}
+      {pending&&<h2>Loading</h2>}
       <form onSubmit={submit}>
         <div className="container">
           <h1>Register</h1>
