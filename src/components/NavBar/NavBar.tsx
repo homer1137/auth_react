@@ -34,7 +34,7 @@ export function NavBar({name, setName}:Props) {
    
       <ul className="topnav">
         <li>
-        <NavLink to="/" end>Home</NavLink>
+        <NavLink to="/" >Home</NavLink>
         </li>
        {!name&& <li>
           <NavLink to="/login">Login</NavLink>
@@ -43,7 +43,10 @@ export function NavBar({name, setName}:Props) {
           <NavLink to="/registration">Registration</NavLink>
         </li>}
         {name&&<li>
-          <NavLink to="/login" onClick={logout} end>Logout</NavLink>
+          <NavLink to="/login" onClick={logout} >Logout</NavLink>
+        </li>}
+        {name&&<li>
+          <NavLink to="/profile" >Profile</NavLink>
         </li>}
       </ul>
     

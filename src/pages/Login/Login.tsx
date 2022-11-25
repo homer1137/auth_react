@@ -9,9 +9,10 @@ import "./Login.css";
 type Props = {
   setName: (name:string)=>void
   setPending: (state:boolean)=>void
+  setUser: (user:{})=>void
 };
 
-export function Login({setName}:Props) {
+export function Login({setName, setUser}:Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -22,14 +23,13 @@ export function Login({setName}:Props) {
       email,
       password
       })
-      console.log('resp', resp.request.response)
-  
+
   })
 
   const [getUser, pendingGetUser, errorGetUser] = useFetching(async()=>{
     const resp:any = await PostServece.user()
-    console.log('resp2', resp.request.response)  
-    setName('egor')
+    setUser(JSON.parse(resp.request.response))
+    setName(JSON.parse(resp.request.response).name)
     navigate("/");
   })
 
@@ -40,30 +40,6 @@ export function Login({setName}:Props) {
  
     await login();
     await getUser();
-
-        // const resp=await fetch("http://127.0.0.1:8000/api/login", {
-        //   method: "POST",
-        //   headers: { "Content-Type": "application/json" },
-        //   redirect: "follow",
-        //   body: JSON.stringify({
-        //     email,
-        //     password,
-        //   }),
-        //   credentials: "include",
-        // });
-        // const resp2=await resp.json();
-        // setName(resp2.name);
-        // (async () => {
-        //   const resp = await fetch("http://127.0.0.1:8000/api/user", {
-        //     headers: { "Content-Type": "application/json" },
-        //     credentials: "include",
-        //   });
-        //   const resp2 = await resp.json();
-        //   setName(resp2.name)
-        // })()
-
-
-        
         
    
   };
